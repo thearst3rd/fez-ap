@@ -1,4 +1,6 @@
+using System.Reflection;
 using Archipelago.MultiClient.Net.Models;
+using FezEngine.Components;
 using FezEngine.Services;
 using FezEngine.Services.Scripting;
 using FezEngine.Structure;
@@ -6,6 +8,8 @@ using FezEngine.Tools;
 using FezGame.Services;
 using FEZUG.Features;
 using FEZUG.Features.Console;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace FEZAP.Archipelago
 {
@@ -46,6 +50,9 @@ namespace FEZAP.Archipelago
         public ICameraService CameraService { private get; set; }
 
         [ServiceDependency]
+        public IDefaultCameraManager CameraManager { private get; set; }
+
+        [ServiceDependency]
         public IPlayerManager PlayerManager { private get; set; }
 
         [ServiceDependency]
@@ -57,13 +64,21 @@ namespace FEZAP.Archipelago
         [ServiceDependency]
         public IDotService DotService { private get; set; }
 
+        [ServiceDependency]
+        public ILevelMaterializer LevelMaterializer { private get; set; }
+
         public static AbilityData ReceivedAbilityData = new(false, false);
 
         public static CollectibleData ReceivedCollectibleData = new([], 0, 0, 0, 0, [], 0, 0);
 
+        public static readonly List<string> OneTimeItems = [
+            "Emotional Support",
+            "Shooting Star",
+        ];
+
         public static bool IsOneTimeItem(string itemName)
         {
-            return itemName.Contains("Trap") || (itemName == "Emotional Support");
+            return itemName.Contains("Trap") || OneTimeItems.Contains(itemName);
         }
 
         private static readonly List<string> EmotionalSupportMsgs = [
@@ -240,6 +255,9 @@ namespace FEZAP.Archipelago
                 case "Emotional Support":
                     DoEmotionalSupport(item);
                     break;
+                case "Shooting Star":
+                    DoShootingStar();
+                    break;
                 default:
                     FezugConsole.Print($"Unknown item: {item.ItemDisplayName}", FezugConsole.OutputType.Error);
                     break;
@@ -353,6 +371,33 @@ namespace FEZAP.Archipelago
         {
             string msg = item.Player.Name + RandomHelper.InList(EmotionalSupportMsgs);
             _ = DotService.Say($"@{msg}", true, true);
+        }
+
+        public void DoShootingStar()
+        {
+            // SkyHost.ShootStars is almost what we want, but unfortunately the probability check is in the function.
+            // Gotta do this all ourselves, but that's good since we can tweak it
+
+            FieldInfo shootingStarField = typeof(SkyHost).GetField("shootingStar", BindingFlags.NonPublic | BindingFlags.Instance);
+            AnimatedTexture shootingStar = (AnimatedTexture)shootingStarField.GetValue(SkyHost.Instance);
+            FieldInfo sShootingStarField = typeof(SkyHost).GetField("sShootingStar", BindingFlags.NonPublic | BindingFlags.Instance);
+            SoundEffect sShootingStar = (SoundEffect)sShootingStarField.GetValue(SkyHost.Instance);
+
+            Vector3 position = CameraManager.Center + LevelManager.Size / 2.0f * CameraManager.Viewpoint.ForwardVector();
+            // Randomize position of shooting star but slightly less so compared to vanilla
+            position += new Vector3(RandomHelper.Centered(CameraManager.Radius / 3.0f - shootingStar.FrameWidth / 32.0f));
+            BackgroundPlane plane = new(LevelMaterializer.AnimatedPlanesMesh, shootingStar)
+            {
+                Position = position,
+                Rotation = CameraManager.Rotation,
+                Doublesided = true,
+                Loop = false,
+                Fullbright = true,
+                Opacity = 1.0f, //TimeManager.NightContribution; Always 1 so it's more visible during daylight
+            };
+            plane.Timing.Step = 0f;
+            sShootingStar.EmitAt(position);
+            LevelManager.AddPlane(plane);
         }
     }
 }
