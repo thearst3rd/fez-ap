@@ -214,6 +214,9 @@ namespace FEZAP.Archipelago
                     DoorManager.ThroneUnlocked = true;
                     Fezap.doorManager.HandleDoors();
                     break;
+                case "Jetpack":
+                    JetpackManager.JetpackUnlocked = true;
+                    break;
                 case "Rotation Trap":
                     DoRotationTrap();
                     break;

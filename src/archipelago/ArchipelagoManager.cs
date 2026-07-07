@@ -77,6 +77,7 @@ namespace FEZAP.Archipelago
 
             ItemManager.ReceivedCollectibleData = new([], 0, 0, 0, 0, [], 0, 0);
             Fezap.doorManager.ResetDoors();
+            JetpackManager.JetpackUnlocked = false;
 
             LoginResult result = session.TryConnectAndLogin(gameName, user, ItemsHandlingFlags.AllItems, password: pass, requestSlotData: true);
 
