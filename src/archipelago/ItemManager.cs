@@ -5,6 +5,7 @@ using FezEngine.Services;
 using FezEngine.Services.Scripting;
 using FezEngine.Structure;
 using FezEngine.Tools;
+using FezGame.Components;
 using FezGame.Services;
 using FEZUG.Features;
 using FEZUG.Features.Console;
@@ -74,6 +75,7 @@ namespace FEZAP.Archipelago
         public static readonly List<string> OneTimeItems = [
             "Emotional Support",
             "Shooting Star",
+            "Frogs",
         ];
 
         public static bool IsOneTimeItem(string itemName)
@@ -258,6 +260,9 @@ namespace FEZAP.Archipelago
                 case "Shooting Star":
                     DoShootingStar();
                     break;
+                case "Frogs":
+                    DoFrogs();
+                    break;
                 default:
                     FezugConsole.Print($"Unknown item: {item.ItemDisplayName}", FezugConsole.OutputType.Error);
                     break;
@@ -398,6 +403,41 @@ namespace FEZAP.Archipelago
             plane.Timing.Step = 0f;
             sShootingStar.EmitAt(position);
             LevelManager.AddPlane(plane);
+        }
+
+        public void DoFrogs()
+        {
+            NpcInstance frog = new()
+            {
+                Name = "Toad",
+                Position = PlayerManager.LeaveGroundPosition - new Vector3(0f, 0.5f, 0f),
+                DestinationOffset = new(-4.125f, 0f, -3.25f),
+                WalkSpeed = 1.5f,
+                RandomizeSpeech = false,
+                SayFirstSpeechLineOnce = false,
+                AvoidsGomez = true,
+                ActorType = ActorType.None,
+                Speech = [],
+                Actions = {
+                    {NpcAction.Idle, new() { AnimationName = "Idle" }},
+                    {NpcAction.Idle2, new() { AnimationName = "Idle2" }},
+                    {NpcAction.Idle3, new() { AnimationName = "Idle3" }},
+                    {NpcAction.Turn, new() { AnimationName = "Turn" }},
+                    {NpcAction.Walk, new() { AnimationName = "Walk" }},
+                }
+            };
+
+            NpcHost npcHost = (NpcHost)ServiceHelper.Game.Components.FirstOrDefault(x => x is NpcHost);
+            if (npcHost != null)
+            {
+                GameNpcState frogState = new(npcHost.Game, frog);
+                ServiceHelper.AddComponent(frogState);
+                frogState.Initialize();
+
+                FieldInfo npcStatesField = typeof(NpcHost).GetField("NpcStates", BindingFlags.NonPublic | BindingFlags.Instance);
+                List<NpcState> NpcStates = (List<NpcState>)npcStatesField.GetValue(npcHost);
+                NpcStates.Add(frogState);
+            }
         }
     }
 }
