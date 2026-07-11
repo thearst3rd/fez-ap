@@ -54,6 +54,11 @@ namespace FEZAP.Archipelago
             " is rooting for you"
         ];
 
+        private static readonly List<string> FillerItems = [
+            "Emotional Support",
+            "Shooting Star",
+        ];
+
         private void ClearCollectibleSaveData()
         {
             GameState.SaveData.Artifacts = [];
@@ -73,7 +78,7 @@ namespace FEZAP.Archipelago
             List<ItemInfo> itemsReceived = [.. ArchipelagoManager.session.Items.AllItemsReceived];
             foreach (ItemInfo item in itemsReceived)
             {
-                if (!(item.ItemName.Contains("Trap") || (item.ItemName == "Emotional Support")))
+                if (!(item.ItemName.Contains("Trap") || FillerItems.Contains(item.ItemName)))
                 {
                     HandleReceivedItem(item);
                 }
