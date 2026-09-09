@@ -42,7 +42,7 @@ namespace FEZAP.Archipelago
 
         private void TurnObjectsAllowedHooked(Action<object> original, object self)
         {
-            if (ItemManager.ReceivedAbilityData.TurnObjects || !ArchipelagoManager.IsConnected())
+            if (ItemManager.ReceivedAbilityData.TurnObjects)
             {
                 original(self);
                 return;

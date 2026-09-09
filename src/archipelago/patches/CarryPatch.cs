@@ -29,7 +29,7 @@ namespace FEZAP.Archipelago
 
         private void LiftAllowedHooked(Action<object> original, object self)
         {
-            if (ItemManager.ReceivedAbilityData.Carry || !ArchipelagoManager.IsConnected())
+            if (ItemManager.ReceivedAbilityData.Carry)
             {
                 original(self);
                 return;
