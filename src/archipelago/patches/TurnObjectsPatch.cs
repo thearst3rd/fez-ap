@@ -20,24 +20,25 @@ namespace FEZAP.Archipelago
         [ServiceDependency]
         public IDotService DotService { private get; set; }
 
-        private Hook TurnPivotAllowedHook;
+        private Hook PivotStateSpinHook;
+        private Hook ValveStateGrabOntoHook;
+        private Hook TombstoneStateGrabOntoHook;
 
-        private Hook ValvesBoltsAllowedHook;
-
-        private Hook GrabTombstoneAllowedHook;
+        private bool DotTalking = false;
 
         public void Init()
         {
             Type PivotsHost = typeof(Fez).Assembly.GetType("FezGame.Components.PivotsHost");
             Type PivotState = PivotsHost.GetNestedType("PivotState", BindingFlags.NonPublic);
-            TurnPivotAllowedHook = new Hook(PivotState.GetMethod("Spin", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            PivotStateSpinHook = new Hook(PivotState.GetMethod("Spin", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
 
             Type ValvesBoltsHost = typeof(Fez).Assembly.GetType("FezGame.Components.ValvesBoltsTimeswitchesHost");
             Type ValveState = ValvesBoltsHost.GetNestedType("ValveState", BindingFlags.NonPublic);
-            ValvesBoltsAllowedHook = new Hook(ValveState.GetMethod("GrabOnto", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            ValveStateGrabOntoHook = new Hook(ValveState.GetMethod("GrabOnto", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
 
-            Type PivotTombstoneAction = typeof(Fez).Assembly.GetType("FezGame.Components.Actions.PivotTombstone");
-            GrabTombstoneAllowedHook = new Hook(PivotTombstoneAction.GetMethod("Begin", BindingFlags.NonPublic | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            Type TombstonesHost = typeof(Fez).Assembly.GetType("FezGame.Components.TombstonesHost");
+            Type TombstoneState = TombstonesHost.GetNestedType("TombstoneState", BindingFlags.NonPublic);
+            TombstoneStateGrabOntoHook = new Hook(TombstoneState.GetMethod("GrabOnto", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
         }
 
         private void TurnObjectsAllowedHooked(Action<object> original, object self)
@@ -48,17 +49,18 @@ namespace FEZAP.Archipelago
                 return;
             }
 
-            PlayerManager.Action = ActionType.Idle;
-
-            string PivotMsg = "You can't turn objects yet";
-            DotService.Say($"@{PivotMsg}", true, true);
+            if (!DotTalking)
+            {
+                DotTalking = true;
+                DotService.Say("@You can't turn objects yet.", true, true).Ended = delegate { DotTalking = false; };
+            }
         }
 
         public void Dispose()
         {
-            TurnPivotAllowedHook.Dispose();
-            ValvesBoltsAllowedHook.Dispose();
-            GrabTombstoneAllowedHook.Dispose();
+            PivotStateSpinHook.Dispose();
+            ValveStateGrabOntoHook.Dispose();
+            TombstoneStateGrabOntoHook.Dispose();
         }
     }
 }
