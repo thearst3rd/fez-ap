@@ -1,9 +1,7 @@
 using System.Reflection;
-using FezEngine.Services.Scripting;
 using FezEngine.Tools;
 using FezGame;
 using FezGame.Services;
-using FezGame.Structure;
 using MonoMod.RuntimeDetour;
 
 /*
