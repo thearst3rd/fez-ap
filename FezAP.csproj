@@ -8,6 +8,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <GenerateDependencyFile>true</GenerateDependencyFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <Import Project="$(ProjectDir)UserProperties.xml" />
@@ -31,13 +32,13 @@
     <Copy SourceFiles="$(ProjectDir)LICENSE" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
     <Copy SourceFiles="$(ProjectDir)README.md" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
     <Copy SourceFiles="@(ModdedAssets)" DestinationFolder="$(ModCompileOutputDir)Assets\%(RecursiveDir)" Retries="0" />
-    <Copy SourceFiles="$(PkgArchipelago_MultiClient_Net)\lib\net6.0\Archipelago.MultiClient.Net.dll" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
-    <Copy SourceFiles="$(PkgArchipelago_MultiClient_Net)\lib\net6.0\Newtonsoft.Json.dll" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
+    <Copy SourceFiles="$(TargetDir)Archipelago.MultiClient.Net.dll" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
+    <Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(ModCompileOutputDir)" Retries="0" />
   </Target>
 
   <!-- Archipelago C# client package -->
   <ItemGroup>
-    <PackageReference Include="Archipelago.MultiClient.Net" Version="6.6.1" GeneratePathProperty="true"/>
+    <PackageReference Include="Archipelago.MultiClient.Net" Version="6.6.1"/>
     <PackageReference Include="Archipelago.MultiClient.Net.Analyzers" Version="1.5.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
