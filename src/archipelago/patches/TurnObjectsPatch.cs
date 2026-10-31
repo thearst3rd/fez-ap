@@ -1,9 +1,8 @@
 using System.Reflection;
 using FezEngine.Services.Scripting;
 using FezEngine.Tools;
-using FezGame;
+using FezGame.Components;
 using FezGame.Services;
-using FezGame.Structure;
 using MonoMod.RuntimeDetour;
 
 /*
@@ -28,17 +27,14 @@ namespace FEZAP.Archipelago
 
         public void Init()
         {
-            Type PivotsHost = typeof(Fez).Assembly.GetType("FezGame.Components.PivotsHost");
-            Type PivotState = PivotsHost.GetNestedType("PivotState", BindingFlags.NonPublic);
-            PivotStateSpinHook = new Hook(PivotState.GetMethod("Spin", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            Type PivotState = typeof(PivotsHost).GetNestedType("PivotState", BindingFlags.NonPublic);
+            PivotStateSpinHook = new Hook(PivotState.GetMethod("Spin"), TurnObjectsAllowedHooked);
 
-            Type ValvesBoltsHost = typeof(Fez).Assembly.GetType("FezGame.Components.ValvesBoltsTimeswitchesHost");
-            Type ValveState = ValvesBoltsHost.GetNestedType("ValveState", BindingFlags.NonPublic);
-            ValveStateGrabOntoHook = new Hook(ValveState.GetMethod("GrabOnto", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            Type ValveState = typeof(ValvesBoltsTimeswitchesHost).GetNestedType("ValveState", BindingFlags.NonPublic);
+            ValveStateGrabOntoHook = new Hook(ValveState.GetMethod("GrabOnto"), TurnObjectsAllowedHooked);
 
-            Type TombstonesHost = typeof(Fez).Assembly.GetType("FezGame.Components.TombstonesHost");
-            Type TombstoneState = TombstonesHost.GetNestedType("TombstoneState", BindingFlags.NonPublic);
-            TombstoneStateGrabOntoHook = new Hook(TombstoneState.GetMethod("GrabOnto", BindingFlags.Public | BindingFlags.Instance), TurnObjectsAllowedHooked);
+            Type TombstoneState = typeof(TombstonesHost).GetNestedType("TombstoneState", BindingFlags.NonPublic);
+            TombstoneStateGrabOntoHook = new Hook(TombstoneState.GetMethod("GrabOnto"), TurnObjectsAllowedHooked);
         }
 
         private void TurnObjectsAllowedHooked(Action<object> original, object self)

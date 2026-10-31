@@ -22,10 +22,10 @@ namespace FEZAP.Archipelago
 
         private void WorldMapBuildNodesHooked(Action<WorldMap, MapNode, MapNode.Connection, MapNode, Vector3, List<Matrix>> original, WorldMap self, MapNode node, MapNode.Connection parentConnection, MapNode parentNode, Vector3 offset, List<Matrix> instances)
         {
-            string levelName = node.LevelName;
-
             if (ArchipelagoManager.IsConnected())
             {
+                string levelName = node.LevelName;
+
                 if ((levelName == "VILLAGEVILLE_3D" && DoorManager.BoileroomUnlocked)
                         || (levelName == "LIGHTHOUSE" && DoorManager.LighthouseUnlocked)
                         || (levelName == "RAILS" && DoorManager.WellUnlocked)

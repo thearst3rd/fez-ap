@@ -11,7 +11,7 @@ namespace FEZAP.Archipelago
 
     public class PatchManager
     {
-        private List<IFezapPatch> Patches = [];
+        private readonly List<IFezapPatch> Patches = [];
 
         public void Init()
         {
@@ -31,7 +31,7 @@ namespace FEZAP.Archipelago
             {
                 patch.Dispose();
             }
-            Patches = [];
+            Patches.Clear();
         }
     }
 }

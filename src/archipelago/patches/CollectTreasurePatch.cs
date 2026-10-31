@@ -35,13 +35,13 @@ namespace FEZAP.Archipelago
         private ILHook OpenTreasureActHook;
 
         [ServiceDependency]
-        public IGameStateManager GameState { get; set; }
+        public IGameStateManager GameState { private get; set; }
 
         [ServiceDependency]
-        public IGomezService GomezService { get; set; }
+        public IGomezService GomezService { private get; set; }
 
         [ServiceDependency]
-        public IDotService DotService { get; set; }
+        public IDotService DotService { private get; set; }
 
         public void Init()
         {
@@ -55,23 +55,22 @@ namespace FEZAP.Archipelago
         private void CreateOpenTreasureActSwitchHook(ILContext il)
         {
             ILCursor cursor = new(il);
-            ILLabel dontSkipLabel = il.DefineLabel();
             ILLabel skipLabel = il.DefineLabel();
 
             cursor.GotoNext(MoveType.After, i => i.MatchCallvirt("FezGame.Services.IPlayerManager", "set_Action")); // Move cursor to right after base.PlayerManager.Action = ActionType.Idle;
-            cursor.EmitDelegate(ArchipelagoManager.IsConnected); // Are we in an Archipelago?
-            cursor.Emit(OpCodes.Brfalse, dontSkipLabel); // Branch to the original method code if not
             cursor.Emit(OpCodes.Ldarg_0); // Push `this` onto the stack, to be the "self" argument in our hook
             cursor.EmitDelegate(OpenTreasureActSwitchHooked); // Call our hooked method
-            cursor.Emit(OpCodes.Br, skipLabel); // Branch to after the code we want to skip
-            cursor.MarkLabel(dontSkipLabel); // Put label at original code position
+            cursor.Emit(OpCodes.Brtrue, skipLabel); // If we are connected to an AP, branch to after the code we want to skip
 
             cursor.GotoNext(MoveType.After, i => i.MatchCallvirt("FezGame.Services.IGameStateManager", "OnHudElementChanged")); // Move cursor to right after base.GameState.OnHudElementChanged();
             cursor.MarkLabel(skipLabel); // Put label for where we want to skip to
         }
 
-        private void OpenTreasureActSwitchHooked(object self)
+        private bool OpenTreasureActSwitchHooked(object self)
         {
+            if (!ArchipelagoManager.IsConnected())
+                return false;
+
             ActorType treasureActorType = (ActorType)OpenTreasureTreasureActorType.GetValue(self);
             TrileInstance treasureInstance = (TrileInstance)OpenTreasureTreasureInstance.GetValue(self);
 
@@ -166,6 +165,8 @@ namespace FEZAP.Archipelago
                     }
                     break;
             }
+
+            return true;
         }
 
         public void Dispose()

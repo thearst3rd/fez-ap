@@ -34,16 +34,16 @@ namespace FEZAP.Archipelago
         private MethodInfo SwooshingCubeDisposeMethod;
 
         [ServiceDependency]
-        public IGameStateManager GameState { get; set; }
+        public IGameStateManager GameState { private get; set; }
 
         [ServiceDependency]
-        public IGameCameraManager CameraManager { get; set; }
+        public IGameCameraManager CameraManager { private get; set; }
 
         [ServiceDependency]
-        public IPlayerManager PlayerManager { get; set; }
+        public IPlayerManager PlayerManager { private get; set; }
 
         [ServiceDependency]
-        public IGameLevelManager LevelManager { get; set; }
+        public IGameLevelManager LevelManager { private get; set; }
 
         public void Init()
         {
@@ -53,15 +53,15 @@ namespace FEZAP.Archipelago
             BitCollectSoundsField = BitHost.GetField("CollectSounds", BindingFlags.NonPublic | BindingFlags.Instance);
             BitTrackedBitsField = BitHost.GetField("TrackedBits", BindingFlags.NonPublic | BindingFlags.Instance);
             BitTrackedCollectsField = BitHost.GetField("TrackedCollects", BindingFlags.NonPublic | BindingFlags.Instance);
-            BitUpdateHook = new Hook(BitHost.GetMethod("Update", BindingFlags.Public | BindingFlags.Instance), BitUpdateHooked);
+            BitUpdateHook = new Hook(BitHost.GetMethod("Update"), BitUpdateHooked);
 
             // Also hook TryInitialize to not add in-progress bits and try to assemble a cube
             BitTryInitializeHook = new Hook(BitHost.GetMethod("TryInitialize", BindingFlags.NonPublic | BindingFlags.Instance), BitTryInitializeHooked);
             BitSolidCubesField = BitHost.GetField("SolidCubes", BindingFlags.NonPublic | BindingFlags.Instance);
             Type SwooshingCube = BitHost.GetNestedType("SwooshingCube", BindingFlags.NonPublic);
             SwooshingCubeConstructor = SwooshingCube.GetConstructor([typeof(TrileInstance), typeof(Mesh), typeof(Vector3), typeof(Quaternion)]);
-            SwooshingCubeSplineField = SwooshingCube.GetField("Spline", BindingFlags.Public | BindingFlags.Instance);
-            SwooshingCubeDisposeMethod = SwooshingCube.GetMethod("Dispose", BindingFlags.Public | BindingFlags.Instance);
+            SwooshingCubeSplineField = SwooshingCube.GetField("Spline");
+            SwooshingCubeDisposeMethod = SwooshingCube.GetMethod("Dispose");
         }
 
         private void BitUpdateHooked(Action<object, GameTime> original, object self, GameTime gameTime)

@@ -21,7 +21,7 @@ namespace FEZAP.Archipelago
         private Hook DotServiceSayDelegateHook;
 
         [ServiceDependency]
-        public IDotManager Dot { get; set; }
+        public IDotManager Dot { private get; set; }
 
         public void Init()
         {

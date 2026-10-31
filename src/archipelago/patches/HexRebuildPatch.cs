@@ -25,10 +25,10 @@ namespace FEZAP.Archipelago
         private int finalSecretCubes;
 
         [ServiceDependency]
-        public IGameStateManager GameState { get; set; }
+        public IGameStateManager GameState { private get; set; }
 
         [ServiceDependency]
-        public IGameLevelManager LevelManager { get; set; }
+        public IGameLevelManager LevelManager { private get; set; }
 
         public void Init()
         {

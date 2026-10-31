@@ -1,8 +1,7 @@
 using System.Reflection;
 using FezEngine.Services.Scripting;
 using FezEngine.Tools;
-using FezGame;
-using FezGame.Components;
+using FezGame.Components.Actions;
 using FezGame.Services;
 using FezGame.Structure;
 using Mono.Cecil.Cil;
@@ -29,11 +28,8 @@ namespace FEZAP.Archipelago
 
         public void Init()
         {
-            Type LiftAction = typeof(Fez).Assembly.GetType("FezGame.Components.Actions.Lift");
-            LiftTestConditionsHook = new ILHook(LiftAction.GetMethod("TestConditions", BindingFlags.NonPublic | BindingFlags.Instance), CreateLiftTestConditionsHook);
-
-            Type GrabAction = typeof(Fez).Assembly.GetType("FezGame.Components.Actions.Grab");
-            GrabTestConditionsHook = new Hook(GrabAction.GetMethod("TestConditions", BindingFlags.NonPublic | BindingFlags.Instance), GrabTestConditionsHooked);
+            LiftTestConditionsHook = new ILHook(typeof(Lift).GetMethod("TestConditions", BindingFlags.NonPublic | BindingFlags.Instance), CreateLiftTestConditionsHook);
+            GrabTestConditionsHook = new Hook(typeof(Grab).GetMethod("TestConditions", BindingFlags.NonPublic | BindingFlags.Instance), GrabTestConditionsHooked);
         }
 
         private void CreateLiftTestConditionsHook(ILContext il)
@@ -77,7 +73,7 @@ namespace FEZAP.Archipelago
             return false;
         }
 
-        private void GrabTestConditionsHooked(Action<object> original, object self)
+        private void GrabTestConditionsHooked(Action<Grab> original, Grab self)
         {
             if (!DotTalking) // Prevent immediately re-grabbing the block (which would delay the dot text)
                 original(self);
